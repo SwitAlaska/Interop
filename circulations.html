@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Décision Vélo Collectif</title>
+    <style>
+		@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+		
+        body {
+            font-family: "Roboto", serif;
+            margin: 20px;
+        }
+        .data-section {
+			margin: auto;
+            margin-bottom: 20px;
+			width: 50%;
+			display: block;
+			text-align: center;
+        }
+		#map {
+			height: 500px;
+			width: 500px;
+			display: block;
+			margin: auto;
+		}
+    </style>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+		integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+		crossorigin=""/>
+		
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+		crossorigin=""></script>
+</head>
+<body>
+    <div class="data-section">
+        <h2>Votre position géographique</h2>
+        <div id="location">Chargement...</div>
+    </div>
+
+    <div class="data-section">
+        <h2>COVID</h2>
+        <div id="covid">Chargement...</div>
+		<canvas id="myChart"></canvas>
+    </div>
+
+    <div class="data-section">
+        <h2>Vélos partagés</h2>
+        <div id="bikes">Chargement...</div>
+		<div id="map"></div>
+    </div>
+
+    <div class="data-section">
+        <h2>Pollution</h2>
+        <div id="pollution">Chargement...</div>
+    </div>
+
+    <div class="data-section">
+        <h2>Météo</h2>
+        <div id="weather">Chargement...</div>
+    </div>
+
+    <div class="data-section">
+        <h2>Conseil</h2>
+        <div id="advice">Chargement...</div>
+    </div>
+	
+	<script>
+	
+	let lat, lon = 0;
+	let loc = "";
+	
+	let velosDispo = 0;
+	let velosTotal = 0;
+	let windSpeed  = 0;
+	
+	const ctx = document.getElementById('myChart').getContext('2d');
+
+    const myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Cas Positifs', 
+            data: [], 
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Cas Positifs'
+            },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+	
+	(async function() {
+		try {
+			const locationUrl = "https://ipapi.co/json/";
+			const response = await fetch(locationUrl);
+			let json = await response.json();
+			
+			lat = json.latitude;
+			lon = json.longitude;
+			
+			loc = json.city;
+			
+			document.querySelector("#location").innerHTML = `
+				<h3>Location: ${loc}</h3>
+				<p>Latitude: ${lat} Longitude: ${lon}</p>
+			`;
+			
+		} catch (error) {
+			console.error('Erreur lors de la récupération des données :', error);
+			return null;
+		}		
+		
+		try {
+			const airUrl = `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/qualite-de-lair-france/records?where=city%20LIKE%20%22%25${loc}%25%22&limit=1`;
+			const response = await fetch(airUrl);
+			let json = await response.json();
+			
+			document.querySelector("#pollution").innerHTML = `
+				<h3>Mesure faite à: ${json.results[0].location}</h3>
+				<p id="pollution-color">${json.results[0].measurements_value}${json.results[0].measurements_unit}</p>
+			`;
+			
+			let color;
+			
+			if (json.results[0].measurements_value <= 10) {
+				color = "green";
+			} else if (json.results[0].measurements_value <= 20) {
+				color = "yellow"; 
+			} else if (json.results[0].measurements_value <= 35) {
+				color = "orange"; 
+			} else if (json.results[0].measurements_value <= 50) {
+				color = "red";
+			}
+			
+			document.querySelector("#pollution-color").style.color = color;
+			
+		} catch (error) {
+			console.error('Erreur lors de la récupération des données :', error);
+			return null;
+		}	
+		
+		try {
+			const meteoUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=dd65705ab94adbf6faf9722ae5356e4d&mode=json`;
+			const response = await fetch(meteoUrl);
+			let json = await response.json();
+			
+			document.querySelector("#weather").innerHTML = `
+				<h3>Temps (en anglais): ${json.weather[0].description}</h3>
+				<p>Vent: ${json.wind.speed} km/h (${json.wind.deg}deg)</p>
+			`;
+			
+			windSpeed = json.wind.speed;
+			
+		} catch (error) {
+			console.error('Erreur lors de la récupération des données :', error);
+			return null;
+		}
+		
+		try {
+			const covidUrl    = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/covid19-france-vue-ensemble/records?limit=5";
+			const response = await fetch(covidUrl);
+			let json = await response.json();
+			
+			let newData = [];
+			let newLabels = [];
+			
+			for(let i = 0; i < json.results.length; i++) {
+				newData.push(json.results[i].tot_positive);
+				newLabels.push(json.results[i].date);
+			}
+			
+			myChart.data.datasets[0].data = newData;
+			myChart.data.labels = newLabels;
+
+			myChart.update();
+			
+			document.querySelector("#covid").innerHTML = `${newData.reduce((a, b) => a + b, 0)} cas positifs sur ${newData.length} jours.`;
+		} catch (error) {
+			console.error('Erreur lors de la récupération des données :', error);
+			return null;
+		}		
+		
+		try {
+			const stationsUrl = "https://api.cyclocity.fr/contracts/nancy/gbfs/station_information.json";
+			const response1 = await fetch(stationsUrl);
+			let json1 = await response1.json();
+			
+			const statusUrl = "https://api.cyclocity.fr/contracts/nancy/gbfs/station_status.json";
+			const response2 = await fetch(statusUrl);
+			let json2 = await response2.json();
+			
+			console.log(json2)
+			
+			const stations = json1.data.stations;
+			const status = json2.data.stations;
+			
+			for(let i = 0; i < stations.length; i++) {
+				for(let j = 0; j < status.length; j++) {
+					if(stations[i].station_id === status[j].station_id) {
+						stations[i].name += " " + status[j].num_bikes_available + "/" + stations[i].capacity + " vélos dispo.";
+						velosTotal += stations[i].capacity;
+						velosDispo += status[j].num_bikes_available;
+					}
+				}
+			}
+			
+			document.querySelector("#bikes").innerHTML = `${velosDispo} vélos dispo. sur ${velosTotal} vélos.`;
+			
+			var map = L.map('map').setView([stations[0].lat, stations[0].lon], 13);
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+			
+			stations.forEach(function(point) {
+				L.marker([point.lat, point.lon]).addTo(map).bindPopup(point.name);
+			});
+			
+			
+		} catch (error) {
+			console.error('Erreur lors de la récupération des données :', error);
+			return null;
+		}
+		
+		if(windSpeed < 30 && velosDispo > 0) {
+			document.querySelector("#advice").innerHTML = "Vous pouvez prendre le vélo ! Le vent est faible et il y a des vélos dispo!";
+		} else if(velosDispo > 0) {
+			document.querySelector("#advice").innerHTML = "Vous ne pouvez pas prendre le vélo ! Le vent est trop fort!";
+		} else {
+			document.querySelector("#advice").innerHTML = "Vous ne pouvez pas prendre le vélo ! Aucun vélo dispo.";
+		}
+	
+	})();	
+	
+	</script>
+</body>
