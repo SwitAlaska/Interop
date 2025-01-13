@@ -141,7 +141,7 @@
 		}		
 		
 		try {
-			const airUrl = `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/qualite-de-lair-france/records?where=city%20LIKE%20%22%25${loc}%25%22&limit=1`;
+			const airUrl = `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/qualite-de-lair-france/records?where=city%20LIKE%20%22%25nancy%25%22&limit=1`;
 			const response = await fetch(airUrl);
 			let json = await response.json();
 			
