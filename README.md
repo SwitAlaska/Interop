@@ -1,7 +1,7 @@
 
 # Atmosphere
 
-Utilisation d'une autre API et d'une autre feuille XSL
+Utilisation d'une autre API et d'une autre feuille XSL pour la météo
 
 Lien webetu: https://webetu.iutnc.univ-lorraine.fr/~perot13u/Interop/atmosphere.php
 
