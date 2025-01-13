@@ -1,7 +1,6 @@
 
 # Atmosphere
 
-Problème avec le proxy webetu, marche en local mais pas sur webetu
 Utilisation d'une autre API et d'une autre feuille XSL
 
 Lien webetu: https://webetu.iutnc.univ-lorraine.fr/~perot13u/Interop/atmosphere.php
