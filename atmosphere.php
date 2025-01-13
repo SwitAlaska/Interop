@@ -169,6 +169,7 @@ if ($gare_payload) {
 ?>
 
 		 <div id="map"></div>
+		 <a href="https://github.com/SwitAlaska/Interop">Lien GitHub</a>
 	</body>
 	
 	<script>

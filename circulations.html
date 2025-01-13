@@ -14,7 +14,7 @@
         .data-section {
 			margin: auto;
             margin-bottom: 20px;
-			width: 50%;
+			width: 70%;
 			display: block;
 			text-align: center;
         }
@@ -67,6 +67,15 @@
         <h2>Conseil</h2>
         <div id="advice">Chargement...</div>
     </div>
+	
+    <div class="data-section">
+        <h2>APIs</h2>
+        <div id="api">Chargement...</div>
+    </div>
+	
+	<div class="data-section">
+		<a href="https://github.com/SwitAlaska/Interop">Lien GitHub</a>
+	</div>
 	
 	<script>
 	
@@ -135,13 +144,16 @@
 				<p>Latitude: ${lat} Longitude: ${lon}</p>
 			`;
 			
+			document.querySelector("#api").innerHTML = `<a href="${locationUrl}">${locationUrl}</a><br />`;
+			
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données :', error);
 			return null;
 		}		
 		
 		try {
-			const airUrl = `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/qualite-de-lair-france/records?where=city%20LIKE%20%22%25nancy%25%22&limit=1`;
+			const airUrl = `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/qualite-de-lair-france/records?where=city%20like%20%22%nancy%%22&limit=1`;
+			
 			const response = await fetch(airUrl);
 			let json = await response.json();
 			
@@ -149,6 +161,8 @@
 				<h3>Mesure faite à: ${json.results[0].location}</h3>
 				<p id="pollution-color">${json.results[0].measurements_value}${json.results[0].measurements_unit}</p>
 			`;
+			
+			document.querySelector("#api").innerHTML += `<a href="${airUrl}">${airUrl}</a><br />`;
 			
 			let color;
 			
@@ -181,6 +195,8 @@
 			
 			windSpeed = json.wind.speed;
 			
+			document.querySelector("#api").innerHTML += `<a href="${meteoUrl}">${meteoUrl}</a><br />`;
+			
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données :', error);
 			return null;
@@ -205,6 +221,8 @@
 			myChart.update();
 			
 			document.querySelector("#covid").innerHTML = `${newData.reduce((a, b) => a + b, 0)} cas positifs sur ${newData.length} jours.`;
+			
+			document.querySelector("#api").innerHTML += `<a href="${covidUrl}">${covidUrl}</a><br />`;
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données :', error);
 			return null;
@@ -243,6 +261,8 @@
 				L.marker([point.lat, point.lon]).addTo(map).bindPopup(point.name);
 			});
 			
+			document.querySelector("#api").innerHTML += `<a href="${stationsUrl}">${stationsUrl}</a><br />`;
+			document.querySelector("#api").innerHTML += `<a href="${statusUrl}">${statusUrl}</a><br />`;
 			
 		} catch (error) {
 			console.error('Erreur lors de la récupération des données :', error);
