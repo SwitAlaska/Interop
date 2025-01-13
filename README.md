@@ -6,7 +6,7 @@ Utilisation d'une autre API et d'une autre feuille XSL
 
 Lien webetu: https://webetu.iutnc.univ-lorraine.fr/~perot13u/Interop/atmosphere.php
 
-Lien Github:
+Lien Github: https://github.com/SwitAlaska/Interop/blob/main/atmosphere.php
 
 
 # Circulations
@@ -15,7 +15,7 @@ Utilisation d'une ancienne API pour les données du Covid car pas trouvé d'api 
 
 Lien webetu: https://webetu.iutnc.univ-lorraine.fr/~perot13u/Interop/circulations.html
 
-Lien Github:
+Lien Github: https://github.com/SwitAlaska/Interop/blob/main/circulations.html
 
 
 
